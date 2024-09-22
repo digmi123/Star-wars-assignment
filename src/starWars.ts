@@ -1,28 +1,42 @@
+export enum CategoriesNames {
+  films = "films",
+  people = "people",
+  planets = "planets",
+  species = "species",
+  starships = "starships",
+  vehicles = "vehicles",
+}
+
 export interface PreviewCardResponseProps {
   category: string;
   resultsPreview: string[];
 }
 
 export interface People {
+  id?: string;
   birth_year: string;
-  created: string;
-  edited: string;
   eye_color: string;
-  films: string[];
   gender: string;
   hair_color: string;
   height: string;
-  homeworld: string;
   mass: string;
   name: string;
-  skin_color: string;
+}
+
+export interface ExtendPeople extends People {
+  created: string;
+  edited: string;
+  films: string[];
+  homeworld: string;
   species: string[];
   starships: string[];
   url: string;
   vehicles: string[];
+  skin_color: string;
 }
 
 export interface Film {
+  id?: string;
   characters: string[];
   created: string;
   director: string;
@@ -40,6 +54,7 @@ export interface Film {
 }
 
 export interface Starship {
+  id?: string;
   MGLT: string;
   cargo_capacity: string;
   consumables: string;
@@ -61,6 +76,7 @@ export interface Starship {
 }
 
 export interface Vehicle {
+  id?: string;
   cargo_capacity: string;
   consumables: string;
   cost_in_credits: string;
@@ -80,6 +96,7 @@ export interface Vehicle {
 }
 
 export interface Specie {
+  id?: string;
   average_height: string;
   average_lifespan: string;
   classification: string;
@@ -98,6 +115,7 @@ export interface Specie {
 }
 
 export interface Planet {
+  id?: string;
   climate: string;
   created: string;
   diameter: string;
@@ -113,5 +131,7 @@ export interface Planet {
   terrain: string;
   url: string;
 }
+
+export type EntityTypes =  Planet | People | Specie | Starship | Vehicle | Film;
 
 

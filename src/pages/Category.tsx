@@ -1,5 +1,3 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Table,
@@ -11,29 +9,56 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useCategory from "@/hooks/useCategory";
-
-const tableHeaders = [
-  "Name",
-  "Gender",
-  "Date Of Birth",
-  "Eye Color",
-  "Hair color",
-  "Height",
-  "Mass",
-  "Actions",
-];
+import AddPeopleDialog from "@/components/AddPeopleDialog";
+import EditPeopleDialog from "@/components/EditPeopleDialog";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { tableHeaders } from "../consts";
+import { People } from "@/starWars";
+import PaginationBar from "@/components/PaginationBar";
 
 export default function Category() {
   const { category } = useParams();
-  const { loading, categoryData, deleteRow } = useCategory();
+
+  const { loading, categoryData, deleteRow, addRow, editRow } = useCategory();
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addPeopleModalOpen, setAddPeopleModalOpen] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState<null | People>(null);
 
   if (loading) return <h1>Loading...</h1>;
 
-  if (category !== "people") return <h1>Category</h1>;
+  if (category !== "people") return <h1>{category}</h1>;
+
+  const handleEdit = (person: People) => {
+    setSelectedPerson(person);
+    setEditModalOpen(true);
+  };
 
   return (
     <main className="w-full h-full p-4 flex flex-col items-center">
       <h1>{category}</h1>
+      <Button
+        className="my-4 bg-primary"
+        variant="secondary"
+        onClick={() => setAddPeopleModalOpen(true)}
+      >
+        Add People
+      </Button>
+
+      <EditPeopleDialog
+        modalOpen={editModalOpen}
+        setModalOpen={setEditModalOpen}
+        person={selectedPerson}
+        editRow={editRow}
+      />
+
+      <AddPeopleDialog
+        addRow={addRow}
+        modalOpen={addPeopleModalOpen}
+        setModalOpen={setAddPeopleModalOpen}
+      />
+
       <Table>
         <TableCaption>
           A list of your specified category ({category}).
@@ -41,10 +66,11 @@ export default function Category() {
         <TableHeader>
           <TableRow>
             {tableHeaders.map((header) => (
-              <TableHead key={header} className="w-[100px]">
-                {header}
+              <TableHead key={header.name} className="w-[100px]">
+                {header.displayName}
               </TableHead>
             ))}
+            <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -58,20 +84,25 @@ export default function Category() {
               <TableCell>{item.height}</TableCell>
               <TableCell>{item.mass}</TableCell>
               <TableCell className="flex gap-2">
-                <button className="bg-blue-600 px-2 py-1 rounded-md">
+                <Button
+                  className="bg-blue-500 text-foreground"
+                  onClick={() => handleEdit(item)}
+                >
                   Edit
-                </button>
-                <button
-                  className="bg-red-600 px-2 py-1 rounded-md"
-                  onClick={() => deleteRow(item.name)}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => deleteRow(item.id)}
                 >
                   Delete
-                </button>
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <PaginationBar />
     </main>
   );
 }

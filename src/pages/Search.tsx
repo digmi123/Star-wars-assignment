@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
-import { Film, People, Planet, Specie, Starship, Vehicle } from "../types";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import {
+  Film,
+  People,
+  Planet,
+  Specie,
+  Starship,
+  Vehicle,
+  CategoriesNames,
+  EntityTypes,
+} from "@/starWars";
 import axios from "axios";
 import PreviewCard from "../components/PreviewCard";
 import { useSearchParams } from "react-router-dom";
-
-enum CategoriesNames {
-  films = "films",
-  people = "people",
-  planets = "planets",
-  species = "species",
-  starships = "starships",
-  vehicles = "vehicles",
-}
+import useDebounce from "../utlis/utils";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import uuid from "react-uuid";
 
 interface Categories {
   [CategoriesNames.films]: Film[];
@@ -22,95 +26,78 @@ interface Categories {
   [CategoriesNames.vehicles]: Vehicle[];
 }
 
-const fieldMapper = (
-  results: (Film | People | Planet | Specie | Starship | Vehicle)[]
-) => {
-  const mappedResults = results.map((res) => {
-    return { name: (res as People).name || (res as Film).title };
-  });
-  return mappedResults;
+const categoriesDefaultState = {
+  [CategoriesNames.films]: [],
+  [CategoriesNames.people]: [],
+  [CategoriesNames.planets]: [],
+  [CategoriesNames.species]: [],
+  [CategoriesNames.starships]: [],
+  [CategoriesNames.vehicles]: [],
 };
 
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const debouncedText = useDebounce(searchParams, 2000);
 
-  const [categoriesData, setCategoriesData] = useState<Categories>({
-    [CategoriesNames.films]: [],
-    [CategoriesNames.people]: [],
-    [CategoriesNames.planets]: [],
-    [CategoriesNames.species]: [],
-    [CategoriesNames.starships]: [],
-    [CategoriesNames.vehicles]: [],
-  });
+  const [categoriesData, setCategoriesData] = useState<Categories>(
+    categoriesDefaultState
+  );
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchQuery = event.target.value;
     setSearchParams({ search: searchQuery });
   };
 
-  useEffect(() => {
-    if (!searchParams.get("search")) return;
+  const getData = useCallback(() => {
     for (const category of Object.values(CategoriesNames)) {
       axios
-        .get(`https://swapi.dev/api/${category}/?${searchParams}`)
+        .get(`https://swapi.dev/api/${category}/?${debouncedText}`)
         .then((response) => {
-          console.log({ response });
+          const transformedData = response.data.results
+            .slice(0, 3)
+            .map((item: EntityTypes) => ({
+              id: uuid(),
+              ...item,
+            }));
+
           setCategoriesData((prev) => ({
             ...prev,
-            [category]: response.data.results,
+            [category]: transformedData,
           }));
         });
     }
-  }, [searchParams]);
+  }, [debouncedText]);
 
-  // const kakiPopen = useCallback(async (searchParams: URLSearchParams) => {
-  //   if (!searchParams.get("search")) return;
-
-  //   const resultsPromises = Object.values(CategoriesNames).map(
-  //     (categoryName) => {
-  //       return axios
-  //         .get(`https://swapi.dev/api/${categoryName}/?${searchParams}`)
-  //         .then((response) => {
-  //           console.log({ response });
-  //           return [categoryName, response.data.results];
-  //         });
-  //     }
-  //   );
-  //   const result = await Promise.all(resultsPromises);
-  //   setCategoriesData(Object.fromEntries(result));
-  // }, []);
-
-  // useEffect(() => {
-  //   kakiPopen(searchParams);
-  // }, [kakiPopen, searchParams]);
+  useEffect(() => {
+    if (debouncedText.get("search")) getData();
+    else setCategoriesData(categoriesDefaultState);
+  }, [debouncedText, getData]);
 
   return (
     <main className="w-full h-full p-4 flex flex-col items-center">
-      <form className="min-w-96 p-4">
+      <form className="w-full max-w-5xl">
         <div className="flex flex-col">
-          <label className="text-red-600 text-xl">Search</label>
-          <input
+          <Label className="text-xl py-2 text-primary">Search</Label>
+          <Input
+            className="bg-foreground text-background"
             type="text"
             placeholder="Search"
             name="search"
-            className="p-2 rounded-md"
             onChange={handleSearch}
             defaultValue={searchParams.get("search") || ""}
           />
         </div>
 
-        <div className="flex flex-col py-4">
+        <div className="grid grid-cols-[repeat(auto-fill,_minmax(200px,_1fr))] auto-rows-fr py-4 gap-4">
           {Object.entries(categoriesData).map(([category, data]) => (
-            <div key={category}>
+            <>
               {data.length > 0 && (
                 <PreviewCard
-                  category={category}
-                  resultsPreview={fieldMapper(
-                    categoriesData[category as keyof Categories].slice(0, 3)
-                  )}
+                  category={category as CategoriesNames}
+                  resultsPreview={data}
                 />
               )}
-            </div>
+            </>
           ))}
         </div>
       </form>

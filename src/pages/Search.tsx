@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, Fragment, useCallback, useEffect, useState } from "react";
 import {
   Film,
   People,
@@ -16,6 +16,10 @@ import useDebounce from "../utlis/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import uuid from "react-uuid";
+import Launch from "./Launch";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/providers/ThemeProvider";
+import moon from "@/assets/moon.svg";
 
 interface Categories {
   [CategoriesNames.films]: Film[];
@@ -36,9 +40,9 @@ const categoriesDefaultState = {
 };
 
 export default function Search() {
+  const { theme, setTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const debouncedText = useDebounce(searchParams, 2000);
-
   const [categoriesData, setCategoriesData] = useState<Categories>(
     categoriesDefaultState
   );
@@ -46,6 +50,11 @@ export default function Search() {
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchQuery = event.target.value;
     setSearchParams({ search: searchQuery });
+  };
+
+  const toggleTheme = () => {
+    if (theme === "light") setTheme("dark");
+    else setTheme("light");
   };
 
   const getData = useCallback(() => {
@@ -74,12 +83,20 @@ export default function Search() {
   }, [debouncedText, getData]);
 
   return (
-    <main className="w-full h-full p-4 flex flex-col items-center">
+    <main className="w-full h-full p-4 flex flex-col items-center relative">
+      <Button onClick={toggleTheme}>
+        <img src={moon} alt="moon" />
+      </Button>
+      <Launch />
+
+      {/* <Button onClick={() => setTheme("light")}>Light mode</Button>
+      <Button onClick={() => setTheme("dark")}>Dark mode</Button> */}
+
       <form className="w-full max-w-5xl">
         <div className="flex flex-col">
-          <Label className="text-xl py-2 text-primary">Search</Label>
+          <Label className="text-xl py-2">Search</Label>
           <Input
-            className="bg-foreground text-background"
+            className="bg-input"
             type="text"
             placeholder="Search"
             name="search"
@@ -90,14 +107,14 @@ export default function Search() {
 
         <div className="grid grid-cols-[repeat(auto-fill,_minmax(200px,_1fr))] auto-rows-fr py-4 gap-4">
           {Object.entries(categoriesData).map(([category, data]) => (
-            <>
+            <Fragment key={category}>
               {data.length > 0 && (
                 <PreviewCard
                   category={category as CategoriesNames}
                   resultsPreview={data}
                 />
               )}
-            </>
+            </Fragment>
           ))}
         </div>
       </form>

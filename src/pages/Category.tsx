@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { tableHeaders } from "../consts";
 import { People } from "@/starWars";
 import PaginationBar from "@/components/PaginationBar";
+import Loader from "./Loader";
 
 export default function Category() {
   const { category } = useParams();
@@ -26,7 +27,7 @@ export default function Category() {
   const [addPeopleModalOpen, setAddPeopleModalOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<null | People>(null);
 
-  if (loading) return <h1>Loading...</h1>;
+  if (loading) return <Loader />;
 
   if (category !== "people") return <h1>{category}</h1>;
 
@@ -40,7 +41,6 @@ export default function Category() {
       <h1>{category}</h1>
       <Button
         className="my-4 bg-primary"
-        variant="secondary"
         onClick={() => setAddPeopleModalOpen(true)}
       >
         Add People

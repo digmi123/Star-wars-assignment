@@ -8,6 +8,7 @@ export default function useCategory() {
   const { category } = useParams();
   const [categoryData, setCategoryData] = useState<People[]>([]);
   const [loading, setLoading] = useState(true);
+  const [numRows, setNumRows] = useState(0);
 
   const [searchParams] = useSearchParams();
   const page = searchParams.get("page") || 1;
@@ -31,8 +32,7 @@ export default function useCategory() {
     axios
       .get(`https://swapi.dev/api/${category}/?page=${page}`)
       .then((response) => {
-        console.log(response.data.results);
-
+        setNumRows(response.data.count);
         const transformedData = response.data.results.map(
           (item: EntityTypes) => ({
             id: uuid(),
@@ -50,5 +50,6 @@ export default function useCategory() {
     deleteRow,
     addRow,
     editRow,
+    numRows,
   };
 }

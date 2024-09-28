@@ -1,59 +1,49 @@
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useSearchParams } from "react-router-dom";
-
-export default function PaginationBar() {
+export default function PaginationBar({ maxPage }: { maxPage: number }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activePage = Number(searchParams.get("page") || 1);
+
+  const currentPage = Number(searchParams.get("page") || 1);
+  console.log({ currentPage });
+
+  const centerPage = Math.min(Math.max(2, currentPage), maxPage - 1);
+  console.log({ centerPage, maxPage });
 
   const handlePageChange = (page: number) => {
     setSearchParams({ page: page.toString() });
   };
+
+  const PaginationNumbers = [centerPage - 1, centerPage, centerPage + 1];
 
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => handlePageChange(activePage - 1)}
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
           />
         </PaginationItem>
+        {PaginationNumbers.map((page) => (
+          <PaginationItem>
+            <PaginationLink
+              onClick={() => handlePageChange(page)}
+              isActive={currentPage === page}
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
         <PaginationItem>
-          <PaginationLink
-            onClick={() => handlePageChange(1)}
-            isActive={activePage === 1}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink
-            onClick={() => handlePageChange(2)}
-            isActive={activePage === 2}
-          >
-            2
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink
-            onClick={() => handlePageChange(3)}
-            isActive={activePage === 3}
-          >
-            3
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationEllipsis />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationNext onClick={() => handlePageChange(activePage + 1)} />
+          <PaginationNext
+            onClick={() => handlePageChange(Math.min(currentPage + 1, maxPage))}
+          />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

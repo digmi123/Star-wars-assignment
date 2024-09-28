@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Launch() {
   const { theme, setTheme } = useTheme();
-  const currentTheme = localStorage.getItem("vite-ui-theme");
+  const currentTheme = localStorage.getItem("star-wars-theme");
   const [showPicker, setShowPicker] = useState(currentTheme ? false : true);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);

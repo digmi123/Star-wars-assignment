@@ -1,17 +1,22 @@
-// import dark from "@/assets/darth-vader.svg";
 import dark from "@/assets/darth-vader.png";
-
-// import yoda2 from "@/assets/yoda2.svg";
-import yoda3 from "@/assets/yoda3.png";
+import yoda from "@/assets/yoda.png";
 import { Theme, useTheme } from "@/providers/ThemeProvider";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Launch() {
-  const { setTheme } = useTheme();
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const { theme, setTheme } = useTheme();
+  const currentTheme = localStorage.getItem("vite-ui-theme");
+  const [showPicker, setShowPicker] = useState(currentTheme ? false : true);
 
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const yodaRef = useRef<HTMLDivElement | null>(null);
   const darthVaderRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    wrapperRef.current?.addEventListener("animationend", () => {
+      if (theme !== "system") setShowPicker(false);
+    });
+  }, [theme]);
 
   const handlePick = (theme: Theme) => {
     setTheme(theme);
@@ -20,40 +25,48 @@ export default function Launch() {
 
     darthVaderRef.current?.classList.remove("animate-fade-in-right");
     darthVaderRef.current?.classList.add("animate-fade-out-left");
-
-    wrapperRef.current?.classList.add("pointer-events-none");
   };
+
+  if (!showPicker) return;
 
   return (
     <div
-      className="flex items-center h-full w-full justify-between absolute top-0"
+      className="flex items-center h-screen w-screen justify-between absolute top-0"
       ref={wrapperRef}
     >
       <div
-        className="h-screen w-[50%] bg-dark-mode-half grid grid-rows-[repeat(auto-fill,_minmax(auto,_1fr))] place-items-center p-4 animate-fade-in-left fill-mode-forwards group cursor-pointer"
+        className="dark h-screen w-[50%] p-4 cursor-pointer bg-background flex flex-col animate-fade-in-left fill-mode-forwards group"
         onClick={() => handlePick("dark")}
         ref={darthVaderRef}
       >
-        <h2 className="text-white font-bold uppercase text-center">
-          Dark mode
-        </h2>
-        <img
-          src={dark}
-          className="w-[600px] h-[600px] transition-transform duration-500 ease-in-out transform group-hover:scale-110 object-contain"
-        />
+        <div className="h-[var(--launch-text-height)]">
+          <h2 className="font-bold text-foreground uppercase text-center">
+            Dark mode
+          </h2>
+        </div>
+        <div className="h-[calc(100%-var(--launch-text-height))] flex items-center">
+          <img
+            src={dark}
+            className="max-w-full max-h-full scale-90 transition-transform duration-500 ease-in-out transform group-hover:scale-100 object-contain"
+          />
+        </div>
       </div>
       <div
-        className="h-screen w-[50%] bg-light-mode-half grid grid-rows-[repeat(auto-fill,_minmax(auto,_1fr))] place-items-center p-4 animate-fade-in-right fill-mode-forwards group cursor-pointer"
+        className="light h-screen w-[50%] p-4 cursor-pointer bg-background flex flex-col animate-fade-in-right fill-mode-forwards group"
         onClick={() => handlePick("light")}
         ref={yodaRef}
       >
-        <h2 className="text-black font-bold uppercase text-center">
-          light mode
-        </h2>
-        <img
-          src={yoda3}
-          className="w-[600px] h-[800px] transition-transform duration-500 ease-in-out transform group-hover:scale-110 object-contain"
-        />
+        <div className="h-[var(--launch-text-height)]">
+          <h2 className="font-bold text-foreground uppercase text-center">
+            light mode
+          </h2>
+        </div>
+        <div className="h-[calc(100%-var(--launch-text-height))] flex items-center">
+          <img
+            src={yoda}
+            className="w-max-w-full max-h-full scale-90 transition-transform duration-500 ease-in-out transform group-hover:scale-100 object-contain"
+          />
+        </div>
       </div>
     </div>
   );

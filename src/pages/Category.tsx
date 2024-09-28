@@ -17,11 +17,15 @@ import { tableHeaders } from "../consts";
 import { People } from "@/starWars";
 import PaginationBar from "@/components/PaginationBar";
 import Loader from "./Loader";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+
+const NUM_ROWS_PER_PAGE = 10;
 
 export default function Category() {
   const { category } = useParams();
 
-  const { loading, categoryData, deleteRow, addRow, editRow } = useCategory();
+  const { loading, categoryData, deleteRow, addRow, editRow, numRows } =
+    useCategory();
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addPeopleModalOpen, setAddPeopleModalOpen] = useState(false);
@@ -38,9 +42,11 @@ export default function Category() {
 
   return (
     <main className="w-full h-full p-4 flex flex-col items-center">
+      <ThemeSwitcher />
       <h1>{category}</h1>
       <Button
-        className="my-4 bg-primary"
+        className="my-4"
+        variant="secondary"
         onClick={() => setAddPeopleModalOpen(true)}
       >
         Add People
@@ -85,7 +91,7 @@ export default function Category() {
               <TableCell>{item.mass}</TableCell>
               <TableCell className="flex gap-2">
                 <Button
-                  className="bg-blue-500 text-foreground"
+                  className="bg-blue-500 text-white"
                   onClick={() => handleEdit(item)}
                 >
                   Edit
@@ -102,7 +108,7 @@ export default function Category() {
         </TableBody>
       </Table>
 
-      <PaginationBar />
+      <PaginationBar maxPage={Math.ceil(numRows / NUM_ROWS_PER_PAGE)} />
     </main>
   );
 }

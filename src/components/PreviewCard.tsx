@@ -70,10 +70,7 @@ export default function PreviewCard({
           className="flex items-center justify-between py-1"
         >
           <h2>{category}</h2>
-          <Button
-            className="px-2 py-1 rounded-md text-color-white cursor-pointer"
-            onClick={handleClick}
-          >
+          <Button onClick={handleClick} variant="secondary">
             View All
           </Button>
         </div>

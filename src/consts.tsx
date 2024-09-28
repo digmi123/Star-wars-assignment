@@ -33,3 +33,12 @@ export const tableHeaders: {
     displayName: "Mass",
   },
 ];
+
+export const categories = [
+  "films",
+  "people",
+  "planets",
+  "species",
+  "starships",
+  "vehicles",
+];
